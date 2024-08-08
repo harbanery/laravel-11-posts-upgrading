@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\PostControllerAPI;
+use App\Models\Category;
 use App\Models\Post;
-use Illuminate\Support\Arr;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -12,8 +14,16 @@ Route::get('/posts', function () {
     return view('posts', ['title' => 'Blog Page', 'posts' => Post::all()]);
 });
 
-Route::get('/posts/{slug}', function ($slug) {
-    return view('post', ['title' => 'Single Post', 'post' => Post::find($slug)]);
+Route::get('/posts/{post:slug}', function (Post $post) {
+    return view('post', ['title' => 'Single Post', 'post' => $post]);
+});
+
+Route::get('/authors/{user}', function (User $user) {
+    return view('posts', ['title' => 'Articles by ' . $user->name, 'posts' => $user->posts]);
+});
+
+Route::get('/categories/{category:slug}', function (Category $category) {
+    return view('posts', ['title' => 'Categories : ' . $category->name, 'posts' => $category->posts]);
 });
 
 Route::get('/about', function () {
@@ -22,4 +32,12 @@ Route::get('/about', function () {
 
 Route::get('/contact', function () {
     return view('contact', ['title' => 'Contact Page']);
+});
+
+Route::controller(PostControllerAPI::class)->group(function () {
+    Route::get('/api/posts', 'index');
+    Route::get('/api/posts/{post}', 'show');
+    Route::post('/api/posts', 'store');
+    Route::put('/api/posts/{post}', 'update');
+    Route::delete('/api/posts/{post}', 'destroy');
 });
